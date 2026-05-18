@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c6c6cd",
+                    "on-primary-container": "#7c839b",
+                    "background": "#f7f9fb",
+                    "surface-variant": "#e0e3e5",
+                    "on-primary-fixed": "#131b2e",
+                    "on-primary": "#ffffff",
+                    "surface-tint": "#565e74",
+                    "outline": "#76777d",
+                    "on-secondary-fixed": "#001a42",
+                    "surface": "#f7f9fb",
+                    "tertiary-container": "#0b1c30",
+                    "secondary-fixed": "#d8e2ff",
+                    "primary": "#000000",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#bec6e0",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-background": "#191c1e",
+                    "surface-bright": "#f7f9fb",
+                    "on-secondary-container": "#fefcff",
+                    "primary-fixed": "#dae2fd",
+                    "on-tertiary-container": "#75859d",
+                    "surface-container-high": "#e6e8ea",
+                    "secondary": "#0058be",
+                    "inverse-surface": "#2d3133",
+                    "inverse-primary": "#bec6e0",
+                    "on-secondary-fixed-variant": "#004395",
+                    "tertiary-fixed": "#d3e4fe",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#0b1c30",
+                    "on-tertiary-fixed-variant": "#38485d",
+                    "surface-container-low": "#f2f4f6",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "on-surface": "#191c1e",
+                    "on-error-container": "#93000a",
+                    "on-surface-variant": "#45464d",
+                    "tertiary-fixed-dim": "#b7c8e1",
+                    "inverse-on-surface": "#eff1f3",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#000000",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#131b2e",
+                    "surface-container": "#eceef0",
+                    "secondary-container": "#2170e4",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#d8dadc",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "stack-lg": "32px",
+                    "sidebar-collapsed": "72px",
+                    "gutter": "24px",
+                    "container-max": "1440px",
+                    "margin-page": "40px",
+                    "stack-md": "16px",
+                    "sidebar-width": "280px",
+                    "stack-sm": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Hanken Grotesk"],
+                    "label-sm": ["JetBrains Mono"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #f7f9fb; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-track { background: transparent; }
+        .chat-container::-webkit-scrollbar-thumb { background: #e2e8e0; border-radius: 10px; }
+        .sidebar-active { border-left: 4px solid #0058be; }
+    </style>
+</head>
+<body class="font-body-md text-on-surface antialiased overflow-hidden">
+<!-- Shell Layout -->
+<div class="flex h-screen w-full">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-primary-container dark:bg-tertiary-container flex flex-col h-full py-stack-lg px-4 border-r border-outline-variant dark:border-surface-variant shadow-sm dark:shadow-none z-50">
+<div class="mb-10 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-extrabold text-on-primary dark:text-on-tertiary">AI Manager</h1>
+<p class="font-label-md text-label-md text-on-primary-container opacity-80">Enterprise Scaffolding</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Chat (Active) -->
+<a class="flex items-center gap-4 bg-secondary dark:bg-secondary-container text-on-secondary dark:text-on-secondary-container rounded-lg p-3 border-l-4 border-secondary duration-200 ease-in-out transform active:scale-95 cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<!-- Tasks (Inactive) -->
+<a class="flex items-center gap-4 text-on-primary-container dark:text-on-tertiary-container p-3 hover:bg-white/10 duration-200 ease-in-out transform active:scale-95 transition-all cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+<span class="font-label-md text-label-md">Tasks</span>
+</a>
+<!-- Settings (Inactive) -->
+<a class="flex items-center gap-4 text-on-primary-container dark:text-on-tertiary-container p-3 hover:bg-white/10 duration-200 ease-in-out transform active:scale-95 transition-all cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto">
+<button class="w-full bg-secondary text-white py-3 px-4 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                    New Instance
+                </button>
+<div class="mt-8 flex items-center gap-3 px-2 pt-6 border-t border-white/10">
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden">
+<img alt="User" data-alt="A professional headshot of a corporate executive in a crisp white shirt, set against a blurred, high-end office environment with cool blue lighting. The style is modern, professional, and clean, echoing an enterprise software aesthetic with sharp focus and minimal distractions." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD77OJnFywxAhl0zCrS-xt7MsM8rEfRC3W8j5Ogsk1I6lnIY6MwQG_KDmOQk__YxUGxM25ZYYFecrge3Tf58tkAJHtlFbxJglzvmm2rpKAqLJvl-4Ht9VTOxBJwAAyT2hCmj7JNlHxC44nguJ6dEFBanLJoCbdTkDKYSWAYbjK9BTe8OKyRcjMQCfhW0BvdcRw--fQO3v6KHpY9OT2VmD7zyfvrQMjzzHOU2GAC6Jl6QfaCSad_p-8OKKsg1-fdjy2Kbhqm6sb1WKY"/>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="font-label-md text-label-md text-white truncate">Alex Thompson</p>
+<p class="text-[10px] text-on-primary-container uppercase tracking-wider">Enterprise Plan</p>
+</div>
+<span class="material-symbols-outlined text-on-primary-container cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 ml-[280px] flex flex-col h-screen">
+<!-- TopAppBar Component -->
+<header class="w-full h-16 flex items-center justify-between items-center px-gutter w-full sticky top-0 z-40 bg-surface dark:bg-background border-b border-outline-variant dark:border-surface-variant">
+<div class="flex items-center gap-6">
+<h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-on-primary-fixed">AI Chat</h2>
+<div class="hidden md:flex items-center gap-1">
+<span class="font-label-sm text-label-sm px-2 py-1 bg-secondary/10 text-secondary rounded">GPT-4 PRO</span>
+<span class="font-label-sm text-label-sm px-2 py-1 bg-surface-container text-on-surface-variant rounded">LATENCY: 42MS</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative flex items-center bg-surface-container-low dark:bg-surface-container-highest px-3 py-1.5 rounded-xl transition-colors">
+<span class="material-symbols-outlined text-outline mr-2 text-xl" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 font-body-sm text-body-sm w-64" placeholder="Search history..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<div class="p-2 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</div>
+<div class="p-2 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Chat Canvas Area -->
+<div class="flex-1 overflow-hidden relative flex flex-col items-center">
+<!-- Background Pattern -->
+<div class="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#0058be 1px, transparent 1px); background-size: 24px 24px;"></div>
+<!-- Message History -->
+<div class="flex-1 w-full max-w-4xl chat-container overflow-y-auto px-margin-page py-10 relative z-10 space-y-stack-lg">
+<!-- System Date Marker -->
+<div class="flex justify-center">
+<span class="font-label-md text-label-md text-outline px-4 py-1 bg-surface-container rounded-full">Today, October 24</span>
+</div>
+<!-- AI Message -->
+<div class="flex gap-gutter group">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex-shrink-0 flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="flex-1 space-y-stack-sm">
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md font-bold">System Architecture Oracle</span>
+<span class="font-label-sm text-label-sm text-outline">10:24 AM</span>
+</div>
+<div class="bg-white border border-slate-200 p-6 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.05)] text-body-md text-body-md leading-relaxed">
+<p class="mb-4">I have analyzed the cloud infrastructure logs for the Q3 deployment. Based on the latency spikes observed between 02:00 and 04:00 UTC, I recommend the following optimizations:</p>
+<ul class="list-disc pl-5 space-y-2 mb-4 text-on-surface-variant">
+<li>Implement multi-region failover for the primary database cluster.</li>
+<li>Increase the load balancer timeout threshold by 150ms.</li>
+<li>Auto-scale instances based on memory pressure rather than CPU utilization.</li>
+</ul>
+<div class="bg-slate-50 border border-slate-200 rounded-lg p-4 font-label-md text-label-md text-secondary-container">
+<code>optimization_matrix.v2.json | ready for review</code>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center gap-1 font-label-sm text-label-sm text-outline hover:text-secondary">
+<span class="material-symbols-outlined text-base" data-icon="content_copy">content_copy</span> Copy
+                                </button>
+<button class="flex items-center gap-1 font-label-sm text-label-sm text-outline hover:text-secondary">
+<span class="material-symbols-outlined text-base" data-icon="refresh">refresh</span> Regenerate
+                                </button>
+</div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex gap-gutter justify-end">
+<div class="max-w-[80%] flex flex-col items-end space-y-stack-sm">
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm text-outline">10:28 AM</span>
+<span class="font-label-md text-label-md font-bold text-secondary">You</span>
+</div>
+<div class="bg-secondary text-white p-6 rounded-xl shadow-lg text-body-md text-body-md">
+<p>That looks solid. Can you draft a Terraform configuration for the multi-region failover recommendation? Please prioritize AWS us-east-1 and us-west-2 regions.</p>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex-shrink-0 overflow-hidden shadow-sm">
+<img alt="Profile" data-alt="A professional headshot of a middle-aged male executive in a corporate setting. The background is a soft-focus modern office with glass partitions and cool-toned lighting. The image style is clean, sharp, and corporate, emphasizing trust and authority with a neutral color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_D7bEYTTbzfrLGUTcs4IKZPH-s4Td0S570wWwioGTjkZlQIjR81ydA1ZqGNiyBXCLZ9twZGLrBIVDz2NPHXtADWoS5blSgt4mef2HwV-9ERtaM36RaNax39K9vKQC6u4XSQP0CFfT6kc6TaCoFu1iTYZn5BZsm3tGk86-81ejmXadujC-m3AHDJyPO58u2TrCk66_1CAQsbH_9V_Ua_2s7RtC_cEtx1-de765LbKk9Rd7nj9CfF890wGzCG_gcajxp4ky3D03_ww"/>
+</div>
+</div>
+<!-- AI Processing State -->
+<div class="flex gap-gutter">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex-shrink-0 flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 font-label-md text-label-md text-secondary animate-pulse">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                                Generating Terraform Scaffolding...
+                            </div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="w-full max-w-4xl px-margin-page pb-margin-page pt-4 relative z-20">
+<div class="bg-white border border-slate-200 rounded-2xl shadow-[0px_10px_30px_rgba(15,23,42,0.12)] p-4">
+<div class="flex items-end gap-3">
+<button class="p-2 text-outline hover:text-secondary hover:bg-slate-50 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="attach_file">attach_file</span>
+</button>
+<div class="flex-1 min-h-[44px] flex items-center">
+<textarea class="w-full border-none focus:ring-0 font-body-md text-body-md resize-none py-2 placeholder:text-outline/60" placeholder="Type a message or ask for enterprise architectural advice..." rows="1"></textarea>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-outline hover:text-secondary hover:bg-slate-50 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+<button class="bg-secondary text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md hover:bg-secondary-container transition-all transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+<div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+<div class="flex gap-2">
+<div class="px-2 py-0.5 rounded bg-slate-100 font-label-sm text-label-sm text-outline-variant flex items-center gap-1 cursor-pointer hover:bg-slate-200">
+<span class="material-symbols-outlined text-[14px]" data-icon="history">history</span> History
+                                </div>
+<div class="px-2 py-0.5 rounded bg-slate-100 font-label-sm text-label-sm text-outline-variant flex items-center gap-1 cursor-pointer hover:bg-slate-200">
+<span class="material-symbols-outlined text-[14px]" data-icon="data_object">data_object</span> Code Mode
+                                </div>
+</div>
+<div class="font-label-sm text-label-sm text-outline/60 italic">
+                                Enterprise Context Active
+                            </div>
+</div>
+</div>
+<!-- Quick Actions Bento Grid Small -->
+<div class="mt-6 grid grid-cols-4 gap-4">
+<div class="bg-white/60 backdrop-blur border border-slate-200 p-3 rounded-xl hover:shadow-sm cursor-pointer transition-all flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-50 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="description">description</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Summarize Docs</span>
+</div>
+<div class="bg-white/60 backdrop-blur border border-slate-200 p-3 rounded-xl hover:shadow-sm cursor-pointer transition-all flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="monitoring">monitoring</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Check Logs</span>
+</div>
+<div class="bg-white/60 backdrop-blur border border-slate-200 p-3 rounded-xl hover:shadow-sm cursor-pointer transition-all flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="security">security</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Security Audit</span>
+</div>
+<div class="bg-white/60 backdrop-blur border border-slate-200 p-3 rounded-xl hover:shadow-sm cursor-pointer transition-all flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="cloud_sync">cloud_sync</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Sync Resources</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

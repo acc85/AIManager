@@ -1,0 +1,250 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Add Task | AI Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-container": "#75859d",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed": "#d3e4fe",
+                      "surface-dim": "#d8dadc",
+                      "surface": "#f7f9fb",
+                      "on-surface": "#191c1e",
+                      "surface-tint": "#565e74",
+                      "surface-container-high": "#e6e8ea",
+                      "on-primary-container": "#7c839b",
+                      "inverse-primary": "#bec6e0",
+                      "tertiary-container": "#0b1c30",
+                      "on-surface-variant": "#45464d",
+                      "primary-fixed-dim": "#bec6e0",
+                      "secondary-fixed": "#d8e2ff",
+                      "on-secondary-fixed-variant": "#004395",
+                      "on-secondary-container": "#fefcff",
+                      "secondary-container": "#2170e4",
+                      "inverse-surface": "#2d3133",
+                      "outline": "#76777d",
+                      "primary": "#000000",
+                      "surface-variant": "#e0e3e5",
+                      "on-background": "#191c1e",
+                      "tertiary": "#000000",
+                      "background": "#f7f9fb",
+                      "primary-fixed": "#dae2fd",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-primary-fixed": "#131b2e",
+                      "surface-container-low": "#f2f4f6",
+                      "on-secondary-fixed": "#001a42",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#0b1c30",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-bright": "#f7f9fb",
+                      "outline-variant": "#c6c6cd",
+                      "error-container": "#ffdad6",
+                      "primary-container": "#131b2e",
+                      "surface-container": "#eceef0",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "secondary": "#0058be"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "stack-sm": "8px",
+                      "stack-lg": "32px",
+                      "sidebar-width": "280px",
+                      "sidebar-collapsed": "72px",
+                      "stack-md": "16px",
+                      "margin-page": "40px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "label-md": ["JetBrains Mono"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "display-lg": ["Hanken Grotesk"],
+                      "body-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "label-sm": ["JetBrains Mono"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sidebar-active-indicator {
+            position: absolute;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: #0058be;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface">
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-primary-container text-on-primary border-r border-outline-variant z-50 flex flex-col py-stack-lg px-4">
+<div class="mb-stack-lg px-2">
+<h1 class="font-headline-md text-headline-md font-extrabold text-on-primary">AI Manager</h1>
+<p class="font-body-sm text-body-sm text-on-primary-container">Enterprise Scaffolding</p>
+</div>
+<button class="mb-8 w-full bg-secondary text-on-secondary rounded-lg py-3 px-4 font-body-md font-bold transition-all duration-200 ease-in-out transform active:scale-95 hover:bg-opacity-90 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add</span>
+            New Instance
+        </button>
+<nav class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-4 text-on-primary-container p-3 rounded-lg hover:bg-white/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex items-center gap-4 bg-secondary text-on-secondary rounded-lg p-3 border-l-4 border-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">task_alt</span>
+<span class="font-label-md text-label-md">Tasks</span>
+</a>
+<a class="flex items-center gap-4 text-on-primary-container p-3 rounded-lg hover:bg-white/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-3 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a corporate executive in a modern, glass-walled office environment. The lighting is bright and natural, reflecting a clean light-mode aesthetic. The individual has a confident yet approachable expression. The color palette is dominated by soft whites, cool grays, and professional navy blues, aligning with a high-end enterprise software interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSIxIyUmdE8AmSlV-LJvg7o300cRhTbRZyCPojpUKpsywGwcdTKC7xX9ETfh50lkbr9-pYotLbFSiqCpoKNm-x6O7OHMMTZCZ5lxj4r1MZOZaEbOSsSS7IOPfZyo8rflMnn2Cm2mfA61dhdTle1aAicsTskw7n_svS6ftGAWdVsZkOV7KCcKhr7TFgDZ1lYXnhRXE9kuu24jsW5ZHxa7XeTwkIkjDNM8_460iyhSjCvKMweprXkNgNclJM_855P1YBRczYzfeObMs">
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-primary">Alex Rivera</p>
+<p class="font-body-sm text-body-sm text-on-primary-container">Admin Access</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width min-h-screen">
+<!-- Top App Bar -->
+<header class="w-full h-16 flex items-center justify-between px-gutter sticky top-0 z-40 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="font-headline-md text-headline-md font-bold text-primary">Add Task</h2>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-colors">help_outline</span>
+</div>
+</header>
+<!-- Focused Form Layout -->
+<div class="max-w-container-max mx-auto p-margin-page">
+<div class="grid grid-cols-12 gap-8">
+<!-- Form Section (Left Column) -->
+<div class="col-span-8">
+<section class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.05)] p-stack-lg border border-outline-variant/30">
+<form class="space-y-stack-lg">
+<!-- Task Name -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">TASK NAME</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all font-body-md text-on-surface" placeholder="e.g., Finalize Q3 Financial Report" type="text">
+</div>
+<!-- Description -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">DESCRIPTION</label>
+<textarea class="w-full p-4 rounded-lg border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all font-body-md resize-none text-on-surface" placeholder="Provide context and key objectives for this task..." rows="6"></textarea>
+</div>
+<!-- Dual Column Row -->
+<div class="grid grid-cols-2 gap-stack-lg">
+<!-- Priority Selector -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Priority</label>
+<div class="flex p-1 bg-surface-container-low rounded-lg border border-outline-variant">
+<button class="flex-1 py-2 rounded-md font-label-md text-label-md transition-all bg-surface-container-lowest text-on-surface shadow-sm" type="button">Low</button>
+<button class="flex-1 py-2 rounded-md font-label-md text-label-md transition-all text-on-surface-variant hover:bg-surface-container-high" type="button">Medium</button>
+<button class="flex-1 py-2 rounded-md font-label-md text-label-md transition-all text-on-surface-variant hover:bg-surface-container-high" type="button">High</button>
+</div>
+</div>
+<!-- Due Date -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Due Date</label>
+<div class="relative">
+<input class="w-full h-12 pl-4 pr-10 rounded-lg border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all font-body-md appearance-none text-on-surface" type="date">
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">calendar_today</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="pt-8 flex items-center justify-end gap-4 border-t border-outline-variant/30">
+<button class="px-6 py-2.5 rounded-lg border border-outline font-body-md font-semibold text-on-surface hover:bg-surface-container-low transition-colors" type="button">Discard</button>
+<button class="px-8 py-2.5 rounded-lg bg-secondary text-on-secondary font-body-md font-semibold shadow-lg shadow-secondary/20 hover:bg-secondary/90 transition-all" type="submit">Create Task</button>
+</div>
+</form>
+</section>
+</div>
+<!-- AI Sidebar / Meta Info (Right Column) -->
+<div class="col-span-4 space-y-stack-md">
+<!-- AI Suggestion Card -->
+<div class="bg-primary-container text-on-primary rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary/20 rounded-full blur-3xl group-hover:scale-125 transition-transform"></div>
+<div class="relative z-10 flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-fixed">auto_awesome</span>
+<span class="font-label-md text-label-md text-secondary-fixed">COGNITIVE ASSIST</span>
+</div>
+<p class="font-body-md text-body-md text-on-primary-container leading-relaxed">
+                                AI can help you break this down into sub-tasks once saved. It will analyze your description to generate a structured roadmap.
+                            </p>
+</div>
+</div>
+<!-- Guidelines Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/30">
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase">System Metadata</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Assigned To</span>
+<span class="font-label-md text-label-md bg-secondary-fixed text-on-secondary-fixed px-2 py-0.5 rounded">You</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Workspace</span>
+<span class="font-label-md text-label-md text-on-surface">Main Scaffold</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Security Level</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error">lock</span>
+<span class="font-label-md text-label-md text-on-surface">Level 4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Asset Placeholder -->
+<div class="rounded-xl overflow-hidden h-48 bg-surface-container-high border border-outline-variant/30 relative">
+<img alt="Technical architectural visualization" class="w-full h-full object-cover opacity-80" data-alt="A sophisticated abstract digital visualization of data structures and neural network pathways. The composition is sleek and technical, with thin glowing lines connecting nodes in a 3D isometric perspective. The background is a very dark navy blue, while the glowing elements use a vibrant electric blue and soft cyan. The overall aesthetic is professional, futuristic, and perfectly suited for a high-density enterprise dashboard focused on artificial intelligence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp-iFfGjgv8QqD4iJDDjEDQxLlZisAZXIuSwMzMldXTz5Gd8H8nzT9vQwEHesfKUmKvG1vDvtFlhErbm3UfwZpdtWT5WrermeNnqfW2_gyt31ZpfnMPaRZ8N1iFjtzJGPZeecDvlrgH6ciS_Cq_iobA50USM92tldu4l8xKXrASWecpgc3JQAX3ceLmIsIv7UBpCLK94nziStiuHtSn9xQ9CqOnZkcF_Kc6okjnXU3RR5epBVGnz6T77WZ0SYvAxeQjVyDbZtALoM">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+<span class="font-label-sm text-label-sm text-white">SYSTEM_ARCHITECTURE_V2.0</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
