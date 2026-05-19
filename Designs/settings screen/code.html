@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings | Aegis Enterprise</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface": "#191c1e",
+                    "surface": "#f7f9fb",
+                    "inverse-surface": "#2d3133",
+                    "surface-container-high": "#e6e8ea",
+                    "outline-variant": "#c6c6cd",
+                    "inverse-primary": "#bec6e0",
+                    "surface-variant": "#e0e3e5",
+                    "on-secondary-fixed": "#001452",
+                    "on-tertiary-container": "#75859d",
+                    "secondary": "#003ec6",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#3f465b",
+                    "tertiary-fixed-dim": "#b7c7e2",
+                    "surface-container-low": "#f2f4f6",
+                    "secondary-fixed-dim": "#b7c4ff",
+                    "on-secondary-fixed-variant": "#0038b6",
+                    "surface-tint": "#565e74",
+                    "urgent-error": "#ba1a1a",
+                    "warning-container": "#ffdad6",
+                    "surface-container": "#eceef0",
+                    "tertiary": "#000000",
+                    "surface-container-highest": "#e0e3e5",
+                    "secondary-container": "#0052fe",
+                    "tertiary-fixed": "#d3e3ff",
+                    "surface-dim": "#d8dadc",
+                    "on-tertiary-fixed": "#0b1c30",
+                    "on-error-container": "#93000a",
+                    "surface-bright": "#f7f9fb",
+                    "primary": "#000000",
+                    "outline": "#76777d",
+                    "on-primary-container": "#7c839b",
+                    "tertiary-container": "#0b1c30",
+                    "on-background": "#191c1e",
+                    "error": "#ba1a1a",
+                    "on-primary": "#ffffff",
+                    "background": "#f7f9fb",
+                    "secondary-fixed": "#dde1ff",
+                    "on-surface-variant": "#45464d",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#131b2e",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#dae2fc",
+                    "on-error": "#ffffff",
+                    "success-pulse": "#4ade80",
+                    "on-primary-fixed": "#131b2e",
+                    "on-secondary-container": "#dfe3ff",
+                    "on-tertiary-fixed-variant": "#38485e",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eff1f3",
+                    "primary-fixed-dim": "#bec6e0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "0.5rem",
+                    "xl": "0.5rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sidebar-width": "280px",
+                    "stack-md": "16px",
+                    "container-max": "1440px",
+                    "stack-lg": "32px",
+                    "gutter": "24px",
+                    "stack-sm": "8px",
+                    "margin-page": "40px"
+            },
+            "fontFamily": {
+                    "label-md": ["JetBrains Mono"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-sm": ["Inter"],
+                    "label-sm": ["JetBrains Mono"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #f7f9fb; }
+        .ambient-card-shadow { box-shadow: 0px 4px 20px rgba(15, 23, 42, 0.05); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 24px; }
+        @media (max-width: 1024px) { .settings-grid { grid-template-columns: 1fr; } }
+        /* Range slider styling */
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #003ec6; cursor: pointer; border: 2px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.5); }
+        input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #003ec6; cursor: pointer; border: 2px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- Persistent SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-tertiary-container flex flex-col py-stack-lg border-r border-outline-variant z-50">
+<div class="px-6 mb-10">
+<h1 class="font-headline-md text-headline-md font-bold text-on-tertiary">Aegis Enterprise</h1>
+<p class="font-label-md text-label-md text-on-tertiary-container mt-1">Technical Operations</p>
+</div>
+<nav class="flex-1 px-2 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/5 transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/5 transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-label-md text-label-md">Tasks</span>
+</a>
+<!-- Active State: Settings -->
+<a class="flex items-center gap-3 px-4 py-3 border-l-4 border-secondary bg-surface-variant/10 text-secondary font-bold cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full bg-secondary text-on-secondary font-label-md text-label-md py-3 rounded hover:opacity-90 transition-opacity active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                New Request
+            </button>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-280px)] h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-gutter z-40">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full h-10 pl-10 pr-4 bg-surface-container-low border border-outline-variant rounded-lg font-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20" placeholder="Search settings, users, or system logs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4 ml-gutter">
+<button class="p-2 text-on-surface-variant hover:text-secondary transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-secondary transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="font-label-md text-label-md text-on-surface">Alexander Vance</p>
+<p class="text-[11px] text-on-surface-variant">Administrator</p>
+</div>
+<img alt="Administrator profile" class="w-10 h-10 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a middle-aged male executive with sharp features, wearing a tailored charcoal suit and a crisp white shirt. The background is a blurred, high-end corporate office with soft, natural lighting and cool blue tones. The portrait has a shallow depth of field, emphasizing a look of intelligence and quiet authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2JAGW2ibXoBV3ef6Ya8MYvOP4p2mVy_r1RRivS2vB00bwwVgfGLDwtrQLX6u3xvz9nmVIuFwGnYObuZl8MB3B3tykeQ6GWU1VE63DAChy2dbfcH6V9b78Nan6z1vY9jyZXJZI1_hRWG80yoPVDvZKL1LyuUlma8ghUmlMCCrIBjdpuFsbW22nzEJCDHlbve9E9FBmxBqtgywiSlcQTMmwGJkQUnuWInr9oSxuUTL2PuF0-2_VaOZXnzd7ijUaA-yMDFfWgvVmU9Y"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width pt-16 min-h-screen">
+<div class="max-w-container-max mx-auto p-margin-page">
+<header class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">System Settings</h2>
+<p class="font-body-md text-on-surface-variant">Configure your Aegis Enterprise environment and AI parameters.</p>
+</header>
+<div class="settings-grid"><section class="bg-surface-container-lowest ambient-card-shadow rounded-lg border border-outline-variant p-stack-lg flex flex-col gap-6"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary" data-icon="psychology">psychology</span><h3 class="font-headline-md text-[20px] text-on-surface">AI Configuration</h3></div><div class="space-y-4"><div><label class="font-label-md text-label-md text-on-surface-variant block mb-2">AI URL Endpoint</label><input class="w-full h-11 px-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm focus:ring-2 focus:ring-secondary/20 outline-none" placeholder="https://api.openai.com/v1" type="text"/></div></div></section></div>
+<!-- Bottom Action -->
+</div>
+</main>
+<script>
+        // Micro-interactions & Dark Mode Toggle Simulation
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                console.log("Switching to Dark Mode...");
+                // In a real app, we'd toggle the class on documentElement
+                // document.documentElement.classList.add('dark');
+            } else {
+                console.log("Switching to Light Mode...");
+                // document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Hover effect for side nav
+        const navItems = document.querySelectorAll('nav a');
+        navItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                if(!item.classList.contains('border-l-4')) {
+                    item.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                }
+            });
+            item.addEventListener('mouseleave', () => {
+                if(!item.classList.contains('border-l-4')) {
+                    item.style.backgroundColor = 'transparent';
+                }
+            });
+        });
+
+        // Temperature slider live feedback
+        const tempSlider = document.querySelector('input[type="range"]');
+        const tempValueDisplay = document.querySelector('.settings-grid section:nth-child(2) .font-label-sm');
+        tempSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            let label = "Balanced";
+            if (val < 0.3) label = "Precise";
+            else if (val > 0.7) label = "Creative";
+            tempValueDisplay.textContent = `${val} ${label}`;
+        });
+    </script>
+</body></html>

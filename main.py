@@ -2,10 +2,11 @@ import customtkinter as ctk
 from openai import OpenAI
 import threading
 import os
+import subprocess
+import socket
 from orchestrator import Orchestrator
 from datetime import datetime
-
-client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
+import json
 
 class AIManagerApp(ctk.CTk):
     def __init__(self):
@@ -27,6 +28,13 @@ class AIManagerApp(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         
+        # Load persisted settings
+        self.load_settings()
+        
+        # Bind close protocol
+        self.llama_process = None
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
         # --- SIDEBAR ---
         self.sidebar_frame = ctk.CTkFrame(self, width=280, corner_radius=0, fg_color=self.c_sidebar)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
@@ -42,6 +50,10 @@ class AIManagerApp(ctk.CTk):
 
         self.nav_editor_btn = ctk.CTkButton(self.sidebar_frame, text="Tasks", corner_radius=8, height=45, fg_color=self.c_brand, text_color="#FFFFFF", font=("Inter", 14), anchor="w", command=lambda: self.select_frame("editor"))
         self.nav_editor_btn.grid(row=3, column=0, padx=20, pady=5, sticky="ew")
+
+        # Added Settings navigation button
+        self.nav_settings_btn = ctk.CTkButton(self.sidebar_frame, text="Settings", corner_radius=8, height=45, fg_color="transparent", hover_color="#1E293B", text_color="#7C839B", font=("Inter", 14), anchor="w", command=lambda: self.select_frame("settings"))
+        self.nav_settings_btn.grid(row=4, column=0, padx=20, pady=5, sticky="ew")
 
         self.new_instance_btn = ctk.CTkButton(self.sidebar_frame, text="+ New Instance", corner_radius=8, height=45, fg_color=self.c_brand, hover_color="#0040CC", text_color="#FFFFFF", font=("Inter", 14, "bold"))
         self.new_instance_btn.grid(row=6, column=0, padx=20, pady=30, sticky="ew")
@@ -59,7 +71,8 @@ class AIManagerApp(ctk.CTk):
         self.screen_title = ctk.CTkLabel(self.top_bar, text="AI Chat", font=("Hanken Grotesk", 18, "bold"), text_color=self.c_text_primary)
         self.screen_title.grid(row=0, column=0, padx=40, pady=15)
         
-        self.model_badge = ctk.CTkLabel(self.top_bar, text="GPT-4 PRO", fg_color="#E0E7FF", text_color=self.c_brand, corner_radius=4, font=("JetBrains Mono", 11, "bold"))
+        # Dynamically set model badge from configuration
+        self.model_badge = ctk.CTkLabel(self.top_bar, text=self.settings["model_name"].upper(), fg_color="#E0E7FF", text_color=self.c_brand, corner_radius=4, font=("JetBrains Mono", 11, "bold"))
         self.model_badge.grid(row=0, column=1, sticky="w", padx=10)
 
         self.chat_scroll = ctk.CTkScrollableFrame(self.chat_frame, fg_color="transparent")
@@ -254,24 +267,338 @@ class AIManagerApp(ctk.CTk):
         add_meta_row(self.meta_card, "Security Level", "Level 4")
         ctk.CTkFrame(self.meta_card, fg_color="transparent", height=10).pack()
 
+        # --- 4. SETTINGS FRAME (System Configuration) ---
+        self.settings_frame = ctk.CTkFrame(self, fg_color=self.c_main_bg, corner_radius=0)
+        self.settings_frame.grid_columnconfigure(0, weight=1)
+        self.settings_frame.grid_rowconfigure(1, weight=1)
+        
+        self.top_bar_set = ctk.CTkFrame(self.settings_frame, fg_color=self.c_card_bg, height=64, corner_radius=0, border_color=self.c_border, border_width=1)
+        self.top_bar_set.grid(row=0, column=0, sticky="ew")
+        self.top_bar_set.grid_propagate(False)
+        
+        self.back_btn_set = ctk.CTkButton(self.top_bar_set, text="< Back", font=("Inter", 14), fg_color="transparent", text_color="#45464D", hover_color="#F2F4F6", width=60, command=lambda: self.select_frame("editor"))
+        self.back_btn_set.pack(side="left", padx=(40, 10), pady=15)
+        
+        ctk.CTkLabel(self.top_bar_set, text="System Settings", font=("Hanken Grotesk", 18, "bold"), text_color=self.c_text_primary).pack(side="left", pady=15)
+        
+        self.settings_scroll = ctk.CTkScrollableFrame(self.settings_frame, fg_color="transparent")
+        self.settings_scroll.grid(row=1, column=0, sticky="nsew", padx=40, pady=20)
+        self.settings_scroll.grid_columnconfigure(0, weight=2)
+        self.settings_scroll.grid_columnconfigure(1, weight=1)
+        
+        # Left Column: Configuration Cards
+        self.settings_cards_container = ctk.CTkFrame(self.settings_scroll, fg_color="transparent")
+        self.settings_cards_container.grid(row=0, column=0, sticky="nsew", padx=(0, 20))
+        
+        # Card 1: AI Configuration
+        self.ai_config_card = ctk.CTkFrame(self.settings_cards_container, fg_color=self.c_card_bg, corner_radius=12, border_color=self.c_border, border_width=1)
+        self.ai_config_card.pack(fill="x", pady=(0, 20))
+        
+        ai_card_header = ctk.CTkFrame(self.ai_config_card, fg_color="transparent")
+        ai_card_header.pack(fill="x", padx=30, pady=(30, 15))
+        ctk.CTkLabel(ai_card_header, text="🧠 AI Configuration", font=("Hanken Grotesk", 18, "bold"), text_color=self.c_text_primary).pack(side="left")
+        
+        ctk.CTkLabel(self.ai_config_card, text="AI URL ENDPOINT", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", padx=30, pady=(10, 5))
+        self.settings_endpoint_entry = ctk.CTkEntry(self.ai_config_card, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=45, text_color=self.c_text_primary)
+        self.settings_endpoint_entry.pack(fill="x", padx=30, pady=(0, 15))
+        
+        ctk.CTkLabel(self.ai_config_card, text="API KEY", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", padx=30, pady=(0, 5))
+        self.settings_apikey_entry = ctk.CTkEntry(self.ai_config_card, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=45, text_color=self.c_text_primary, show="*")
+        self.settings_apikey_entry.pack(fill="x", padx=30, pady=(0, 15))
+        
+        ctk.CTkLabel(self.ai_config_card, text="MODEL NAME", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", padx=30, pady=(0, 5))
+        self.settings_model_entry = ctk.CTkEntry(self.ai_config_card, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=45, text_color=self.c_text_primary)
+        self.settings_model_entry.pack(fill="x", padx=30, pady=(0, 15))
+        
+        ctk.CTkLabel(self.ai_config_card, text="AI TEMPERATURE", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", padx=30, pady=(0, 5))
+        temp_val_row = ctk.CTkFrame(self.ai_config_card, fg_color="transparent")
+        temp_val_row.pack(fill="x", padx=30, pady=(0, 5))
+        self.temp_slider_label = ctk.CTkLabel(temp_val_row, text="0.7 (Balanced)", font=("Inter", 14), text_color=self.c_brand)
+        self.temp_slider_label.pack(side="left")
+        
+        self.settings_temp_slider = ctk.CTkSlider(self.ai_config_card, from_=0.0, to=1.0, number_of_steps=100, fg_color=self.c_border, progress_color=self.c_brand, button_color=self.c_brand, button_hover_color="#0040CC", command=self.update_temp_slider_label)
+        self.settings_temp_slider.pack(fill="x", padx=30, pady=(0, 30))
+        
+        # Card 2: System Configuration
+        self.sys_config_card = ctk.CTkFrame(self.settings_cards_container, fg_color=self.c_card_bg, corner_radius=12, border_color=self.c_border, border_width=1)
+        self.sys_config_card.pack(fill="x", pady=(0, 20))
+        
+        sys_card_header = ctk.CTkFrame(self.sys_config_card, fg_color="transparent")
+        sys_card_header.pack(fill="x", padx=30, pady=(30, 15))
+        ctk.CTkLabel(sys_card_header, text="⚙️ System Workspace Configuration", font=("Hanken Grotesk", 18, "bold"), text_color=self.c_text_primary).pack(side="left")
+        
+        ctk.CTkLabel(self.sys_config_card, text="WORKSPACE DIRECTORY PATH", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", padx=30, pady=(10, 5))
+        self.settings_workspace_entry = ctk.CTkEntry(self.sys_config_card, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=45, text_color=self.c_text_primary)
+        self.settings_workspace_entry.pack(fill="x", padx=30, pady=(0, 30))
+        
+        # Action Row
+        self.settings_btn_row = ctk.CTkFrame(self.settings_cards_container, fg_color="transparent")
+        self.settings_btn_row.pack(fill="x", pady=(0, 30))
+        self.settings_save_btn = ctk.CTkButton(self.settings_btn_row, text="Save Settings", font=("Inter", 14, "bold"), fg_color=self.c_brand, hover_color="#0040CC", text_color="#FFFFFF", corner_radius=8, height=45, command=self.save_settings_from_ui)
+        self.settings_save_btn.pack(side="right", padx=(10, 0))
+        self.settings_discard_btn = ctk.CTkButton(self.settings_btn_row, text="Discard", font=("Inter", 14), fg_color="transparent", border_color=self.c_border, border_width=1, text_color=self.c_text_primary, hover_color="#F2F4F6", corner_radius=8, height=45, command=lambda: self.select_frame("editor"))
+        self.settings_discard_btn.pack(side="right")
+        
+        # Right Column: Info Sidebar
+        self.settings_sidebar = ctk.CTkFrame(self.settings_scroll, fg_color="transparent")
+        self.settings_sidebar.grid(row=0, column=1, sticky="nsew")
+        
+        # Llama Server Logs Card (Right Sidebar)
+        self.logs_card = ctk.CTkFrame(self.settings_sidebar, fg_color=self.c_card_bg, corner_radius=12, border_color=self.c_border, border_width=1)
+        self.logs_card.pack(fill="x", pady=(0, 20))
+        
+        logs_header_row = ctk.CTkFrame(self.logs_card, fg_color="transparent")
+        logs_header_row.pack(fill="x", padx=20, pady=(20, 10))
+        
+        ctk.CTkLabel(logs_header_row, text="📋 Llama Server Logs", font=("Hanken Grotesk", 16, "bold"), text_color=self.c_text_primary).pack(side="left")
+        
+        # Clear Logs Button
+        clear_logs_btn = ctk.CTkButton(logs_header_row, text="Clear", font=("Inter", 12), fg_color="transparent", text_color="#64748B", hover_color="#F2F4F6", width=50, height=24, command=self.clear_logs)
+        clear_logs_btn.pack(side="right")
+        
+        # Scrollable textbox for terminal log viewing
+        self.log_textbox = ctk.CTkTextbox(self.logs_card, height=450, fg_color="#0F172A", text_color="#34D399", font=("Consolas", 12), border_color="#1E293B", border_width=1)
+        self.log_textbox.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        self.log_textbox.configure(state="disabled")
+        
+        self.settings_info = ctk.CTkFrame(self.settings_sidebar, fg_color="#131B2E", corner_radius=12)
+        self.settings_info.pack(fill="x", pady=(0, 20))
+        ctk.CTkLabel(self.settings_info, text="💡 CONFIGURATION HELP", font=("JetBrains Mono", 12, "bold"), text_color="#D8E2FF").pack(anchor="w", padx=20, pady=(20, 5))
+        ctk.CTkLabel(self.settings_info, text="Endpoints should specify the base API path (e.g. http://localhost:8080/v1). For local servers like llama-server, keep the endpoint on localhost:8080.\n\nTemperature values control AI output randomness: Precise (< 0.3), Balanced (0.3 - 0.7), and Creative (> 0.7).", font=("Inter", 14), text_color="#7C839B", justify="left", wraplength=300).pack(anchor="w", padx=20, pady=(0, 20))
 
+        # --- STATE ---
         self.chat_messages = [
             {"role": "system", "content": "You are AIManager, an autonomous agent orchestrator."}
         ]
         self.row_counter = 0
 
+        # Start local Llama server if it hasn't been started yet
+        self.start_llama_server()
+        
+        # Initialize OpenAI client with configured parameters
+        self.client = OpenAI(base_url=self.settings["api_endpoint"], api_key=self.settings["api_key"])
+
         # Phase 2: Start Orchestrator
-        self.workspace_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "workspace")
+        self.workspace_dir = self.settings["workspace_dir"]
         self.orchestrator = Orchestrator(self.workspace_dir, self.handle_new_task)
         self.orchestrator.start()
 
         self.select_frame("editor")
         
-        self.add_bubble("System", "AIManager initialized. Please ensure your LM Studio local server is running on port 1234.")
-        self.add_bubble("System", f"Polling engine started. Monitoring workspace\\task.md for changes.")
+        self.add_bubble("System", "AIManager initialized. Persistent settings configuration loaded.")
+        self.add_bubble("System", f"Polling engine started. Monitoring {self.workspace_dir}\\task.md for changes.")
         
         # Initial refresh
         self.after(500, self.refresh_task_table)
+
+    def is_port_in_use(self, port):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.5)
+            return s.connect_ex(('127.0.0.1', port)) == 0
+
+    def start_llama_server(self):
+        endpoint = self.settings.get("api_endpoint", "")
+        # Only start llama-server if configured to localhost:8080 or 127.0.0.1:8080
+        if "localhost:8080" not in endpoint and "127.0.0.1:8080" not in endpoint:
+            print("Configured endpoint is not localhost:8080. Skipping local llama-server autostart.")
+            self.append_log("System: Configured endpoint is not localhost:8080. Skipping local llama-server autostart.\n")
+            return
+
+        if self.is_port_in_use(8080):
+            print("Port 8080 is in use. Assuming Llama server or another process is running.")
+            self.add_bubble("System", "Port 8080 is active. Llama-server detection complete.")
+            self.append_log("System: Llama-server is already running (detected active port 8080).\n")
+            return
+
+        llama_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llama")
+        exe_path = os.path.join(llama_dir, "llama-server.exe")
+
+        if not os.path.exists(exe_path):
+            self.add_bubble("System", f"Error: Could not locate llama-server.exe in {llama_dir}")
+            self.append_log(f"System Error: Could not locate llama-server.exe in {llama_dir}\n")
+            return
+
+        cmd = [
+            exe_path,
+            "-m", "E:\\models\\unsloth\\Qwen3.6-35B-A3B-MTP-GGUF\\Qwen3.6-35B-A3B-UD-Q3_K_M.gguf",
+            "-ngl", "100",
+            "-fa", "on",
+            "-c", "65536",
+            "-np", "4",
+            "--spec-type", "draft-mtp",
+            "--spec-draft-n-max", "2"
+        ]
+
+        try:
+            # CREATE_NO_WINDOW = 0x08000000 on Windows
+            creation_flags = 0x08000000 if os.name == 'nt' else 0
+            self.llama_process = subprocess.Popen(
+                cmd,
+                cwd=llama_dir,
+                creationflags=creation_flags,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
+            
+            self.add_bubble("System", "Llama-server launched. Monitoring logs...")
+            self.append_log("System: Spawning Llama-server process...\n")
+            
+            # Start background thread to read output
+            threading.Thread(target=self.log_reader, daemon=True).start()
+        except Exception as e:
+            self.add_bubble("System", f"Failed to start Llama-server: {e}")
+            self.append_log(f"System Error: Failed to start Llama-server: {e}\n")
+
+    def log_reader(self):
+        try:
+            while True:
+                if not hasattr(self, 'llama_process') or not self.llama_process:
+                    break
+                line = self.llama_process.stdout.readline()
+                if not line:
+                    break
+                self.after(0, self.append_log, line)
+        except Exception as e:
+            self.after(0, self.append_log, f"\nSystem Error reading logs: {e}\n")
+
+    def append_log(self, text):
+        if hasattr(self, 'log_textbox') and self.log_textbox.winfo_exists():
+            self.log_textbox.configure(state="normal")
+            self.log_textbox.insert("end", text)
+            
+            # Prevent memory issues: truncate logs if too long
+            current_text = self.log_textbox.get("1.0", "end-1c")
+            if len(current_text) > 100000:
+                self.log_textbox.delete("1.0", "200.0")
+                
+            self.log_textbox.see("end")
+            self.log_textbox.configure(state="disabled")
+
+    def clear_logs(self):
+        if hasattr(self, 'log_textbox') and self.log_textbox.winfo_exists():
+            self.log_textbox.configure(state="normal")
+            self.log_textbox.delete("1.0", "end")
+            self.log_textbox.configure(state="disabled")
+
+    def on_closing(self):
+        if hasattr(self, 'orchestrator'):
+            try:
+                self.orchestrator.stop()
+            except Exception:
+                pass
+
+        if hasattr(self, 'llama_process') and self.llama_process:
+            try:
+                self.llama_process.stdout.close()
+            except Exception:
+                pass
+            try:
+                self.llama_process.terminate()
+                self.llama_process.wait(timeout=2)
+            except Exception as e:
+                print(f"Error terminating llama-server subprocess: {e}")
+
+        self.destroy()
+
+    def load_settings(self):
+        self.settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+        default_settings = {
+            "api_endpoint": "http://localhost:8080/v1",
+            "api_key": "not-needed",
+            "model_name": "local-model",
+            "temperature": 0.7,
+            "workspace_dir": os.path.join(os.path.dirname(os.path.abspath(__file__)), "workspace")
+        }
+        
+        if os.path.exists(self.settings_path):
+            try:
+                with open(self.settings_path, 'r', encoding='utf-8') as f:
+                    self.settings = json.load(f)
+                                
+                # Ensure all default keys exist
+                for k, v in default_settings.items():
+                    if k not in self.settings:
+                        self.settings[k] = v
+            except Exception as e:
+                print(f"Error loading settings.json: {e}")
+                self.settings = default_settings
+        else:
+            self.settings = default_settings
+            self.save_settings_to_file()
+
+    def save_settings_to_file(self):
+        try:
+            with open(self.settings_path, 'w', encoding='utf-8') as f:
+                json.dump(self.settings, f, indent=4)
+        except Exception as e:
+            print(f"Error saving settings.json: {e}")
+
+    def apply_settings(self, new_settings):
+        ws_changed = (new_settings["workspace_dir"] != self.settings["workspace_dir"])
+        
+        self.settings = new_settings
+        self.save_settings_to_file()
+        
+        # Update client base URL and api key
+        self.client = OpenAI(base_url=self.settings["api_endpoint"], api_key=self.settings["api_key"])
+        
+        # Update model badge
+        self.model_badge.configure(text=self.settings["model_name"].upper())
+        
+        # Update workspace dir
+        self.workspace_dir = self.settings["workspace_dir"]
+        
+        # Re-initialize observer if directory changed
+        if ws_changed and hasattr(self, 'orchestrator'):
+            self.orchestrator.stop()
+            self.orchestrator = Orchestrator(self.workspace_dir, self.handle_new_task)
+            self.orchestrator.start()
+            self.add_bubble("System", f"Workspace directory updated. Now monitoring: {self.workspace_dir}")
+
+    def update_temp_slider_label(self, val):
+        val = round(float(val), 2)
+        label = "Balanced"
+        if val < 0.3:
+            label = "Precise"
+        elif val > 0.7:
+            label = "Creative"
+        self.temp_slider_label.configure(text=f"{val} ({label})")
+
+    def load_settings_into_ui(self):
+        self.settings_endpoint_entry.delete(0, "end")
+        self.settings_endpoint_entry.insert(0, self.settings["api_endpoint"])
+        
+        self.settings_apikey_entry.delete(0, "end")
+        self.settings_apikey_entry.insert(0, self.settings["api_key"])
+        
+        self.settings_model_entry.delete(0, "end")
+        self.settings_model_entry.insert(0, self.settings["model_name"])
+        
+        temp_val = float(self.settings.get("temperature", 0.7))
+        self.settings_temp_slider.set(temp_val)
+        self.update_temp_slider_label(temp_val)
+        
+        self.settings_workspace_entry.delete(0, "end")
+        self.settings_workspace_entry.insert(0, self.settings["workspace_dir"])
+
+    def save_settings_from_ui(self):
+        new_settings = {
+            "api_endpoint": self.settings_endpoint_entry.get().strip(),
+            "api_key": self.settings_apikey_entry.get().strip(),
+            "model_name": self.settings_model_entry.get().strip(),
+            "temperature": round(float(self.settings_temp_slider.get()), 2),
+            "workspace_dir": self.settings_workspace_entry.get().strip()
+        }
+        
+        if not new_settings["api_endpoint"] or not new_settings["workspace_dir"]:
+            self.add_bubble("System", "Error: Endpoint and Workspace directory cannot be empty.")
+            return
+            
+        self.apply_settings(new_settings)
+        self.add_bubble("System", "Settings applied and saved successfully.")
+        self.select_frame("editor")
 
     def refresh_task_table(self):
         # Clear existing rows
@@ -282,23 +609,27 @@ class AIManagerApp(ctk.CTk):
 
         tasks = []
         task_queue_path = os.path.join(self.workspace_dir, "task.md")
-        if os.path.exists(task_queue_path):
-            with open(task_queue_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            for line in content.split('\n'):
-                line = line.strip()
-                status = None
-                if line.startswith('- [ ] '):
-                    status = "Pending"
-                elif line.startswith('- [>] '):
-                    status = "In Progress"
-                elif line.startswith('- [x] '):
-                    status = "Completed"
-                    
-                if status:
-                    task_content = line[6:]
-                    name = task_content.split(": ", 1)[0] if ": " in task_content else task_content
-                    tasks.append((status, name))
+        
+        # Read file under lock
+        lock = self.orchestrator.lock if hasattr(self, 'orchestrator') else threading.RLock()
+        with lock:
+            if os.path.exists(task_queue_path):
+                with open(task_queue_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                for line in content.split('\n'):
+                    line = line.strip()
+                    status = None
+                    if line.startswith('- [ ] '):
+                        status = "Pending"
+                    elif line.startswith('- [>] '):
+                        status = "In Progress"
+                    elif line.startswith('- [x] '):
+                        status = "Completed"
+                        
+                    if status:
+                        task_content = line[6:]
+                        name = task_content.split(": ", 1)[0] if ": " in task_content else task_content
+                        tasks.append((status, name))
 
         # Update KPI
         if hasattr(self, 'kpi_labels'):
@@ -334,22 +665,36 @@ class AIManagerApp(ctk.CTk):
             self.chat_frame.grid(row=0, column=1, sticky="nsew")
             self.editor_frame.grid_forget()
             self.add_task_frame.grid_forget()
+            self.settings_frame.grid_forget()
             self.nav_chat_btn.configure(fg_color=self.c_brand, text_color="#FFFFFF")
             self.nav_editor_btn.configure(fg_color="transparent", text_color="#7C839B")
+            self.nav_settings_btn.configure(fg_color="transparent", text_color="#7C839B")
         elif name == "editor":
             self.editor_frame.grid(row=0, column=1, sticky="nsew")
             self.chat_frame.grid_forget()
             self.add_task_frame.grid_forget()
+            self.settings_frame.grid_forget()
             self.nav_editor_btn.configure(fg_color=self.c_brand, text_color="#FFFFFF")
             self.nav_chat_btn.configure(fg_color="transparent", text_color="#7C839B")
+            self.nav_settings_btn.configure(fg_color="transparent", text_color="#7C839B")
             self.refresh_task_table()
         elif name == "add_task":
             self.add_task_frame.grid(row=0, column=1, sticky="nsew")
             self.editor_frame.grid_forget()
             self.chat_frame.grid_forget()
-            # Deselect sidebar nav visually as we are in a sub-screen
+            self.settings_frame.grid_forget()
             self.nav_editor_btn.configure(fg_color=self.c_brand, text_color="#FFFFFF")
             self.nav_chat_btn.configure(fg_color="transparent", text_color="#7C839B")
+            self.nav_settings_btn.configure(fg_color="transparent", text_color="#7C839B")
+        elif name == "settings":
+            self.settings_frame.grid(row=0, column=1, sticky="nsew")
+            self.chat_frame.grid_forget()
+            self.editor_frame.grid_forget()
+            self.add_task_frame.grid_forget()
+            self.nav_settings_btn.configure(fg_color=self.c_brand, text_color="#FFFFFF")
+            self.nav_chat_btn.configure(fg_color="transparent", text_color="#7C839B")
+            self.nav_editor_btn.configure(fg_color="transparent", text_color="#7C839B")
+            self.load_settings_into_ui()
 
     def save_new_task(self):
         title = self.task_name_entry.get().strip()
@@ -358,19 +703,23 @@ class AIManagerApp(ctk.CTk):
             return
             
         task_queue_path = os.path.join(self.workspace_dir, "task.md")
-        content = ""
-        if os.path.exists(task_queue_path):
-            with open(task_queue_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-                
-        if "# Tasks" not in content:
-            content = "# Tasks\n\n"
-            
-        task_string = f"- [ ] {title}: {desc}\n"
-        content += task_string
         
-        with open(task_queue_path, "w", encoding="utf-8") as f:
-            f.write(content)
+        # Write under lock
+        lock = self.orchestrator.lock if hasattr(self, 'orchestrator') else threading.RLock()
+        with lock:
+            content = ""
+            if os.path.exists(task_queue_path):
+                with open(task_queue_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+            if "# Tasks" not in content:
+                content = "# Tasks\n\n"
+                
+            task_string = f"- [ ] {title}: {desc}\n"
+            content += task_string
+            
+            with open(task_queue_path, "w", encoding="utf-8") as f:
+                f.write(content)
             
         # clear fields
         self.task_name_entry.delete(0, "end")
@@ -418,14 +767,25 @@ class AIManagerApp(ctk.CTk):
 
     def call_llm(self):
         try:
-            response = client.chat.completions.create(
-                model="local-model",
+            response = self.client.chat.completions.create(
+                model=self.settings.get("model_name", "local-model"),
                 messages=self.chat_messages,
-                temperature=0.7,
+                temperature=float(self.settings.get("temperature", 0.7)),
                 stream=True
             )
             
-            ai_label = self.add_bubble("AI Oracle", "")
+            # Thread-safe creation of bubble
+            label_container = []
+            creation_event = threading.Event()
+            
+            def create_bubble_on_main():
+                lbl = self.add_bubble("AI Oracle", "")
+                label_container.append(lbl)
+                creation_event.set()
+                
+            self.after(0, create_bubble_on_main)
+            creation_event.wait()
+            ai_label = label_container[0]
             
             ai_message = ""
             for chunk in response:
@@ -439,13 +799,15 @@ class AIManagerApp(ctk.CTk):
             if hasattr(self, 'orchestrator'):
                 self.orchestrator.write_active_task(ai_message)
                 self.orchestrator.mark_task_completed()
-                
                 self.after(0, self.refresh_task_table)
 
         except Exception as e:
-            self.add_bubble("System", f"Error connecting to LM Studio: {e}")
+            self.after(0, lambda err=e: self.add_bubble("System", f"Error connecting to Llama Server: {err}"))
+            if hasattr(self, 'orchestrator'):
+                self.orchestrator.rollback_active_task()
+                self.after(0, self.refresh_task_table)
         finally:
-            self.send_button.configure(state="normal")
+            self.after(0, lambda: self.send_button.configure(state="normal"))
 
     def handle_new_task(self, task_content):
         self.after(0, self._process_task_gui_update, task_content)
