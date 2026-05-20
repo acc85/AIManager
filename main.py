@@ -597,12 +597,13 @@ class AIManagerApp(ctk.CTk):
                 "-s",
                 comfy_main,
                 "--windows-standalone-build",
-                "--port", str(port)
+                "--port", str(port),
+                "--disable-auto-launch"
             ]
             cwd = comfy_dir
             shell_val = False
         else:
-            cmd = [comfy_path, "--port", str(port)]
+            cmd = [comfy_path, "--port", str(port), "--disable-auto-launch"]
             cwd = comfy_dir
             shell_val = True
 
