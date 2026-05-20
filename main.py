@@ -254,11 +254,12 @@ class AIManagerApp(ctk.CTk):
         self.pri_seg = ctk.CTkSegmentedButton(self.priority_frame, values=["Low", "Medium", "High"], variable=self.priority_var, fg_color=self.c_main_bg, selected_color=self.c_brand, unselected_color=self.c_main_bg, selected_hover_color="#0040CC", height=40)
         self.pri_seg.pack(fill="x")
         
-        self.date_frame = ctk.CTkFrame(self.form_row, fg_color="transparent")
-        self.date_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
-        ctk.CTkLabel(self.date_frame, text="DUE DATE", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", pady=(0, 5))
-        self.date_entry = ctk.CTkEntry(self.date_frame, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=40, placeholder_text="YYYY-MM-DD", text_color=self.c_text_primary)
-        self.date_entry.pack(fill="x")
+        self.task_type_frame = ctk.CTkFrame(self.form_row, fg_color="transparent")
+        self.task_type_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
+        ctk.CTkLabel(self.task_type_frame, text="TASK TYPE", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", pady=(0, 5))
+        self.task_type_var = ctk.StringVar(value="General AI Task")
+        self.task_type_seg = ctk.CTkSegmentedButton(self.task_type_frame, values=["General AI Task", "Generate Image"], variable=self.task_type_var, fg_color=self.c_main_bg, selected_color=self.c_brand, unselected_color=self.c_main_bg, selected_hover_color="#0040CC", height=40)
+        self.task_type_seg.pack(fill="x")
         
         self.btn_row = ctk.CTkFrame(self.form_container, fg_color="transparent")
         self.btn_row.pack(fill="x", padx=30, pady=(0, 30))
@@ -934,6 +935,7 @@ class AIManagerApp(ctk.CTk):
         if not title:
             return
             
+        task_type = self.task_type_var.get()
         task_queue_path = os.path.join(self.workspace_dir, "task.md")
         
         # Write file in a background worker thread to prevent main GUI thread blocking
@@ -949,7 +951,9 @@ class AIManagerApp(ctk.CTk):
                     if "# Tasks" not in content:
                         content = "# Tasks\n\n"
                         
-                    task_string = f"- [ ] {title}: {desc}\n"
+                    prefix = "image: " if task_type == "Generate Image" else ""
+                    task_content = f"{title}: {desc}" if desc else title
+                    task_string = f"- [ ] {prefix}{task_content}\n"
                     content += task_string
                     
                     with open(task_queue_path, "w", encoding="utf-8") as f:
@@ -962,6 +966,7 @@ class AIManagerApp(ctk.CTk):
         # clear fields
         self.task_name_entry.delete(0, "end")
         self.task_desc_entry.delete("1.0", "end")
+        self.task_type_var.set("General AI Task")
         
         # go back to dashboard
         self.select_frame("editor")
