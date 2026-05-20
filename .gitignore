@@ -4,5 +4,6 @@ __pycache__/
 workspace/active_task.md
 settings.json
 llama/
+comfyui/
 scratch_*.py
 

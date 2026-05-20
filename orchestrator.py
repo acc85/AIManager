@@ -33,7 +33,6 @@ class TaskQueueHandler(FileSystemEventHandler):
     def _process_task_queue(self):
         with self.lock:
             try:
-                time.sleep(0.5)  # Debounce file changes
                 with open(self.task_path, "r", encoding="utf-8") as f:
                     content = f.read()
                     
@@ -41,20 +40,21 @@ class TaskQueueHandler(FileSystemEventHandler):
                     return
                     
                 lines = content.split('\n')
-                task_to_process = None
+                tasks_to_process = []
                 
                 for i, line in enumerate(lines):
                     if line.strip().startswith("- [ ] "):
-                        task_to_process = line.strip()[6:]
+                        task_content = line.strip()[6:]
+                        tasks_to_process.append(task_content)
                         lines[i] = line.replace("- [ ] ", "- [>] ", 1)
-                        break
                         
-                if task_to_process:
+                if tasks_to_process:
                     new_content = '\n'.join(lines)
                     with open(self.task_path, "w", encoding="utf-8") as f:
                         f.write(new_content)
                     self.last_content = new_content.strip()
-                    self.on_new_task_callback(task_to_process)
+                    for task_name in tasks_to_process:
+                        self.on_new_task_callback(task_name)
                 else:
                     self.last_content = content.strip()
                     
