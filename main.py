@@ -46,6 +46,7 @@ class AIManagerApp(ctk.CTk):
         
         # Bind close protocol
         self.llama_process = None
+        self.comfy_process = None
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         
         # Task execution tracking
@@ -357,6 +358,27 @@ class AIManagerApp(ctk.CTk):
         self.settings_workspace_entry = ctk.CTkEntry(self.sys_config_card, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=45, text_color=self.c_text_primary)
         self.settings_workspace_entry.pack(fill="x", padx=30, pady=(0, 30))
         
+        # Card 3: ComfyUI Configuration
+        self.comfy_config_card = ctk.CTkFrame(self.settings_cards_container, fg_color=self.c_card_bg, corner_radius=12, border_color=self.c_border, border_width=1)
+        self.comfy_config_card.pack(fill="x", pady=(0, 20))
+        
+        comfy_card_header = ctk.CTkFrame(self.comfy_config_card, fg_color="transparent")
+        comfy_card_header.pack(fill="x", padx=30, pady=(30, 15))
+        ctk.CTkLabel(comfy_card_header, text="🎨 ComfyUI Configuration", font=("Hanken Grotesk", 18, "bold"), text_color=self.c_text_primary).pack(side="left")
+        
+        # Autostart Toggle
+        self.settings_comfy_autostart_var = ctk.BooleanVar(value=True)
+        self.settings_comfy_autostart_checkbox = ctk.CTkCheckBox(self.comfy_config_card, text="AUTO-START COMFYUI ENGINE ON STARTUP", variable=self.settings_comfy_autostart_var, font=("Inter", 13, "bold"), text_color=self.c_text_primary, fg_color=self.c_brand, hover_color="#0040CC")
+        self.settings_comfy_autostart_checkbox.pack(anchor="w", padx=30, pady=(10, 15))
+        
+        ctk.CTkLabel(self.comfy_config_card, text="COMFYUI BATCH FILE PATH (run_nvidia_gpu.bat)", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", padx=30, pady=(0, 5))
+        self.settings_comfy_path_entry = ctk.CTkEntry(self.comfy_config_card, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=45, text_color=self.c_text_primary)
+        self.settings_comfy_path_entry.pack(fill="x", padx=30, pady=(0, 15))
+        
+        ctk.CTkLabel(self.comfy_config_card, text="COMFYUI PORT", font=("JetBrains Mono", 12, "bold"), text_color="#45464D").pack(anchor="w", padx=30, pady=(0, 5))
+        self.settings_comfy_port_entry = ctk.CTkEntry(self.comfy_config_card, font=("Inter", 16), fg_color=self.c_main_bg, border_color=self.c_border, border_width=1, height=45, text_color=self.c_text_primary)
+        self.settings_comfy_port_entry.pack(fill="x", padx=30, pady=(0, 30))
+        
         # Action Row
         self.settings_btn_row = ctk.CTkFrame(self.settings_cards_container, fg_color="transparent")
         self.settings_btn_row.pack(fill="x", pady=(0, 30))
@@ -371,21 +393,33 @@ class AIManagerApp(ctk.CTk):
         
         # Llama Server Logs Card (Right Sidebar)
         self.logs_card = ctk.CTkFrame(self.settings_sidebar, fg_color=self.c_card_bg, corner_radius=12, border_color=self.c_border, border_width=1)
-        self.logs_card.pack(fill="x", pady=(0, 20))
+        self.logs_card.pack(fill="both", expand=True, pady=(0, 20))
         
         logs_header_row = ctk.CTkFrame(self.logs_card, fg_color="transparent")
-        logs_header_row.pack(fill="x", padx=20, pady=(20, 10))
+        logs_header_row.pack(fill="x", padx=20, pady=(20, 5))
         
-        ctk.CTkLabel(logs_header_row, text="📋 Llama Server Logs", font=("Hanken Grotesk", 16, "bold"), text_color=self.c_text_primary).pack(side="left")
+        ctk.CTkLabel(logs_header_row, text="📋 Subprocess Terminals", font=("Hanken Grotesk", 16, "bold"), text_color=self.c_text_primary).pack(side="left")
         
         # Clear Logs Button
-        clear_logs_btn = ctk.CTkButton(logs_header_row, text="Clear", font=("Inter", 12), fg_color="transparent", text_color="#64748B", hover_color="#F2F4F6", width=50, height=24, command=self.clear_logs)
+        clear_logs_btn = ctk.CTkButton(logs_header_row, text="Clear Logs", font=("Inter", 12), fg_color="transparent", text_color="#64748B", hover_color="#F2F4F6", width=80, height=24, command=self.clear_logs)
         clear_logs_btn.pack(side="right")
         
-        # Scrollable textbox for terminal log viewing
-        self.log_textbox = ctk.CTkTextbox(self.logs_card, height=450, fg_color="#0F172A", text_color="#34D399", font=("Consolas", 12), border_color="#1E293B", border_width=1)
-        self.log_textbox.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        # Tabview for LLM and ComfyUI logs
+        self.logs_tabview = ctk.CTkTabview(self.logs_card, height=450, fg_color="transparent")
+        self.logs_tabview.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        
+        self.logs_tabview.add("LLM Engine")
+        self.logs_tabview.add("Image Engine")
+        
+        # LLM Engine logs textbox
+        self.log_textbox = ctk.CTkTextbox(self.logs_tabview.tab("LLM Engine"), fg_color="#0F172A", text_color="#34D399", font=("Consolas", 12), border_color="#1E293B", border_width=1)
+        self.log_textbox.pack(fill="both", expand=True)
         self.log_textbox.configure(state="disabled")
+        
+        # Image Engine logs textbox
+        self.comfy_log_textbox = ctk.CTkTextbox(self.logs_tabview.tab("Image Engine"), fg_color="#0F172A", text_color="#38BDF8", font=("Consolas", 12), border_color="#1E293B", border_width=1)
+        self.comfy_log_textbox.pack(fill="both", expand=True)
+        self.comfy_log_textbox.configure(state="disabled")
         
         self.settings_info = ctk.CTkFrame(self.settings_sidebar, fg_color="#131B2E", corner_radius=12)
         self.settings_info.pack(fill="x", pady=(0, 20))
@@ -425,6 +459,9 @@ class AIManagerApp(ctk.CTk):
 
         # Start local Llama server if it hasn't been started yet
         self.start_llama_server()
+        
+        # Start local ComfyUI server if configured
+        self.start_comfy_server()
         
         # Initialize OpenAI client with configured parameters
         self.client = OpenAI(base_url=self.settings["api_endpoint"], api_key=self.settings["api_key"])
@@ -527,11 +564,104 @@ class AIManagerApp(ctk.CTk):
             self.log_textbox.see("end")
             self.log_textbox.configure(state="disabled")
 
+    def start_comfy_server(self):
+        autostart = self.settings.get("comfy_autostart", True)
+        if not autostart:
+            self.append_comfy_log("System: ComfyUI auto-start is disabled in settings.\n")
+            return
+
+        port = self.settings.get("comfy_port", 8188)
+        if self.is_port_in_use(port):
+            print(f"Port {port} is in use. Assuming ComfyUI is already running.")
+            self.add_bubble("System", f"Port {port} is active. ComfyUI engine ready.")
+            self.append_comfy_log(f"System: ComfyUI is already running (detected active port {port}).\n")
+            return
+
+        comfy_path = self.settings.get("comfy_path", "")
+        if not comfy_path:
+            comfy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "comfyui", "run_nvidia_gpu.bat")
+
+        if not os.path.exists(comfy_path):
+            self.add_bubble("System", f"Error: Could not locate ComfyUI launcher at {comfy_path}")
+            self.append_comfy_log(f"System Error: Could not locate ComfyUI launcher at {comfy_path}\n")
+            return
+
+        comfy_dir = os.path.dirname(comfy_path)
+        python_exe = os.path.join(comfy_dir, "python_embeded", "python.exe")
+        comfy_main = os.path.join(comfy_dir, "ComfyUI", "main.py")
+
+        if os.path.exists(python_exe) and os.path.exists(comfy_main):
+            cmd = [
+                python_exe,
+                "-s",
+                comfy_main,
+                "--windows-standalone-build",
+                "--port", str(port)
+            ]
+            cwd = comfy_dir
+            shell_val = False
+        else:
+            cmd = [comfy_path, "--port", str(port)]
+            cwd = comfy_dir
+            shell_val = True
+
+        try:
+            creation_flags = 0x08000000 if os.name == 'nt' else 0
+            self.comfy_process = subprocess.Popen(
+                cmd,
+                cwd=cwd,
+                creationflags=creation_flags,
+                shell=shell_val,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
+            
+            self.add_bubble("System", "ComfyUI backend launched. Monitoring logs...")
+            self.append_comfy_log("System: Spawning ComfyUI process...\n")
+            
+            # Start background thread to read comfy output
+            threading.Thread(target=self.comfy_log_reader, daemon=True).start()
+        except Exception as e:
+            self.add_bubble("System", f"Failed to start ComfyUI: {e}")
+            self.append_comfy_log(f"System Error: Failed to start ComfyUI: {e}\n")
+
+    def comfy_log_reader(self):
+        try:
+            while True:
+                if not hasattr(self, 'comfy_process') or not self.comfy_process:
+                    break
+                line = self.comfy_process.stdout.readline()
+                if not line:
+                    break
+                self.after(0, self.append_comfy_log, line)
+        except Exception as e:
+            if hasattr(self, 'comfy_process') and self.comfy_process:
+                self.after(0, self.append_comfy_log, f"\nSystem Error reading ComfyUI logs: {e}\n")
+
+    def append_comfy_log(self, text):
+        if hasattr(self, 'comfy_log_textbox') and self.comfy_log_textbox.winfo_exists():
+            self.comfy_log_textbox.configure(state="normal")
+            self.comfy_log_textbox.insert("end", text)
+            
+            # Prevent memory issues: truncate logs if too long
+            current_text = self.comfy_log_textbox.get("1.0", "end-1c")
+            if len(current_text) > 100000:
+                self.comfy_log_textbox.delete("1.0", "200.0")
+                
+            self.comfy_log_textbox.see("end")
+            self.comfy_log_textbox.configure(state="disabled")
+
     def clear_logs(self):
         if hasattr(self, 'log_textbox') and self.log_textbox.winfo_exists():
             self.log_textbox.configure(state="normal")
             self.log_textbox.delete("1.0", "end")
             self.log_textbox.configure(state="disabled")
+        if hasattr(self, 'comfy_log_textbox') and self.comfy_log_textbox.winfo_exists():
+            self.comfy_log_textbox.configure(state="normal")
+            self.comfy_log_textbox.delete("1.0", "end")
+            self.comfy_log_textbox.configure(state="disabled")
 
     def on_closing(self):
         if hasattr(self, 'orchestrator'):
@@ -551,6 +681,17 @@ class AIManagerApp(ctk.CTk):
             except Exception as e:
                 print(f"Error terminating llama-server subprocess: {e}")
 
+        if hasattr(self, 'comfy_process') and self.comfy_process:
+            try:
+                self.comfy_process.stdout.close()
+            except Exception:
+                pass
+            try:
+                self.comfy_process.terminate()
+                self.comfy_process.wait(timeout=2)
+            except Exception as e:
+                print(f"Error terminating comfy_process subprocess: {e}")
+
         self.destroy()
 
     def load_settings(self):
@@ -560,7 +701,10 @@ class AIManagerApp(ctk.CTk):
             "api_key": "not-needed",
             "model_name": "local-model",
             "temperature": 0.7,
-            "workspace_dir": os.path.join(os.path.dirname(os.path.abspath(__file__)), "workspace")
+            "workspace_dir": os.path.join(os.path.dirname(os.path.abspath(__file__)), "workspace"),
+            "comfy_autostart": True,
+            "comfy_path": os.path.join(os.path.dirname(os.path.abspath(__file__)), "comfyui", "run_nvidia_gpu.bat"),
+            "comfy_port": 8188
         }
         
         if os.path.exists(self.settings_path):
@@ -634,13 +778,29 @@ class AIManagerApp(ctk.CTk):
         self.settings_workspace_entry.delete(0, "end")
         self.settings_workspace_entry.insert(0, self.settings["workspace_dir"])
 
+        self.settings_comfy_autostart_var.set(self.settings.get("comfy_autostart", True))
+
+        self.settings_comfy_path_entry.delete(0, "end")
+        self.settings_comfy_path_entry.insert(0, self.settings.get("comfy_path", ""))
+
+        self.settings_comfy_port_entry.delete(0, "end")
+        self.settings_comfy_port_entry.insert(0, str(self.settings.get("comfy_port", 8188)))
+
     def save_settings_from_ui(self):
+        try:
+            port_val = int(self.settings_comfy_port_entry.get().strip())
+        except ValueError:
+            port_val = 8188
+
         new_settings = {
             "api_endpoint": self.settings_endpoint_entry.get().strip(),
             "api_key": self.settings_apikey_entry.get().strip(),
             "model_name": self.settings_model_entry.get().strip(),
             "temperature": round(float(self.settings_temp_slider.get()), 2),
-            "workspace_dir": self.settings_workspace_entry.get().strip()
+            "workspace_dir": self.settings_workspace_entry.get().strip(),
+            "comfy_autostart": self.settings_comfy_autostart_var.get(),
+            "comfy_path": self.settings_comfy_path_entry.get().strip(),
+            "comfy_port": port_val
         }
         
         if not new_settings["api_endpoint"] or not new_settings["workspace_dir"]:
